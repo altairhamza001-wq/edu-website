@@ -1,0 +1,43 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Право на запись нужно, чтобы action мог создать/обновить ветку gh-pages
+permissions:
+  contents: write
+
+jobs:
+  # 1) CI: проверка синтаксиса HTML
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run HTMLHint
+        run: npx --yes htmlhint "**/*.html"
+
+  # 2) CD: публикация на GitHub Pages (только после успешной проверки и только при push)
+  build-deploy:
+    needs: lint
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          exclude_assets: '.github,.htmlhintrc,README.md'
