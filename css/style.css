@@ -18,9 +18,8 @@ body {
 }
 
 header {
-  background: var(--accent);
+  background: #16a34a;
   padding: 12px 16px;
-  color: green;
 }
 
 nav a {
